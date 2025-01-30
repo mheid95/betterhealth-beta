@@ -97,7 +97,8 @@ function formatWhatsAppMessage(items: CartItem[], addressText?: string): string 
       const customizations = item.customizations?.length 
         ? `\nCustomizations: ${item.customizations.join(', ')}`
         : ''
-      const hasDeposit = itemId in MENU.drinks || (itemId in MENU.ferments && itemId !== 'sourdough_protein_bread')
+      const hasDeposit = itemId in MENU.drinks || 
+        (itemId in MENU.fermented_foods && itemId !== 'sourdough_protein_bread')
       const depositInfo = hasDeposit ? `\nDeposit: $3.500 (refundable)` : ''
       return `• ${item.quantity}x ${item.name} (${item.size})\nPrice: $${item.price}${depositInfo}${customizations}`
     })

@@ -12,11 +12,9 @@ export interface CartItem {
 export function calculateDeposits(items: CartItem[]): number {
   return items.reduce((total, item) => {
     const itemId = item.name.toLowerCase().replace(/ /g, '_')
-    // Add deposit for drinks and all fermented foods except sourdough
-    if (itemId in MENU.drinks || (itemId in MENU.ferments && itemId !== 'sourdough_protein_bread')) {
-      return total + (3500 * item.quantity) // 3.500 deposit per item
-    }
-    return total
+    const hasDeposit = itemId in MENU.drinks || 
+      (itemId in MENU.fermented_foods && itemId !== 'sourdough_protein_bread')
+    return total + (hasDeposit ? 3500 * item.quantity : 0)
   }, 0)
 }
 

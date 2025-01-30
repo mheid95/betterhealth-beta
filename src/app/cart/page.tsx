@@ -1,7 +1,12 @@
 "use client"
 
 import { useCart } from "@/context/cart-context"
-import { getBowlMacros, getDessertMacros, getDrinkMacros, getFermentMacros } from "@/config/nutritional-info"
+import { 
+  getBowlMacros, 
+  getDessertMacros, 
+  getDrinkMacros, 
+  getFermentedFoodMacros as getFermentMacros 
+} from "@/config/nutritional-info"
 import { MENU, BowlType } from "@/config/menu-prices"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -77,8 +82,8 @@ function CartContent() {
         itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
       } else if (itemId in MENU.drinks) {
         itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
-      } else if (itemId in MENU.ferments) {
-        itemMacros = getFermentMacros(itemId as keyof typeof MENU.ferments, item.size)
+      } else if (itemId in MENU.fermented_foods) {
+        itemMacros = getFermentMacros(itemId as keyof typeof MENU.fermented_foods, item.size)
       }
 
       if (itemMacros) {
@@ -155,8 +160,8 @@ ${address.comments ? `\nSpecial Instructions:\n${address.comments}` : ''}`
                   itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
                 } else if (itemId in MENU.drinks) {
                   itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
-                } else if (itemId in MENU.ferments) {
-                  itemMacros = getFermentMacros(itemId as keyof typeof MENU.ferments, item.size)
+                } else if (itemId in MENU.fermented_foods) {
+                  itemMacros = getFermentMacros(itemId as keyof typeof MENU.fermented_foods, item.size)
                 }
               } catch {
                 // Item doesn't have macros or there was an error

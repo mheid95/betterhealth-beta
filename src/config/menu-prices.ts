@@ -382,4 +382,6 @@ export function getDeliveryPrice(zone: 'inner_city' | 'outer_city', orderTotal: 
 
 export function formatPrice(price: string): string {
   return `$${price}`
-} 
+}
+
+export type MenuCategory = 'bowls' | 'desserts' | 'drinks' | 'fermented_foods' 

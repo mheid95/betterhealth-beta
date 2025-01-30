@@ -579,4 +579,6 @@ export function getBowlPortion(bowlType: keyof typeof NUTRITION.bowls, size: 'no
     throw new Error(`Size ${size} not available for ${bowlType}`)
   }
   return bowl[size]!.portion
-} 
+}
+
+export { getFermentedFoodMacros as getFermentMacros } 

@@ -1,6 +1,6 @@
 "use client"
 
-import { MENU, getFermentPrice } from "@/config/menu-prices"
+import { MENU } from "@/config/menu-prices"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useMemo } from "react"
@@ -111,7 +111,7 @@ export default function FermentedFoodsPage() {
 
                 // Get the correct price and volume based on size
                 const currentPrice = selectedSize === 'big' && item.hasBigSize
-                  ? getFermentedFoodPrice(item.id as keyof typeof MENU.fermented_foods, 'big')
+                  ? MENU.fermented_foods[item.id as keyof typeof MENU.fermented_foods].big?.price ?? item.price
                   : item.price;
 
                 // Display text for volume
@@ -162,7 +162,7 @@ export default function FermentedFoodsPage() {
                         <div className="flex items-center justify-between pt-2">
                           <div className="flex flex-col">
                             <span className="text-lg font-semibold text-brand-green">
-                              ${currentPrice.includes('.') ? currentPrice : `${currentPrice}.000`}
+                              ${currentPrice?.includes('.') ? currentPrice : `${currentPrice}.000`}
                             </span>
                             <span className="text-sm text-brand-dark">{volumeDisplay}</span>
                           </div>

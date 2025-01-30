@@ -9,20 +9,20 @@ import { CreditCard, Clock, Leaf, UtensilsCrossed } from "lucide-react"
 
 const slides = [
   {
-    image: "/images/food/salmon_bowl.webp",
-    alt: "Fresh healthy salmon bowl",
+    image: "/images/slide/slide1.jpg",
+    alt: "Fresh healthy meals",
     title: "Premium Organic Meals",
     description: "Clean ingredients, exceptional taste"
   },
   {
-    image: "/images/food/chicken_coconut_curry.webp",
-    alt: "Delicious chicken coconut curry",
+    image: "/images/slide/slide2.jpg",
+    alt: "Fermented foods",
     title: "High-Performance Nutrition",
     description: "Fuel your body with the best"
   },
   {
-    image: "/images/food/organic_quinoa.webp",
-    alt: "Organic quinoa bowl",
+    image: "/images/slide/slide3.jpg",
+    alt: "Fresh ingredients",
     title: "Fresh Daily Preparation",
     description: "Made fresh every morning"
   }
@@ -69,7 +69,7 @@ export default function Home() {
   return (
     <>
       {/* Hero Section with Slideshow */}
-      <section className="relative h-[90vh] overflow-hidden bg-brand-dark">
+      <section className="relative h-[90vh] overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
@@ -79,29 +79,26 @@ export default function Home() {
             transition={{ duration: 1 }}
             className="absolute inset-0"
           >
-            <div className="relative h-full w-full">
-              <Image
-                src={slides[currentSlide].image}
-                alt={slides[currentSlide].alt}
-                fill
-                className="object-cover brightness-50"
-                priority
-                onError={(e) => {
-                  const imgElement = e.target as HTMLImageElement;
-                  if (imgElement.src.endsWith('.webp')) {
-                    imgElement.src = imgElement.src.replace('.webp', '.PNG');
-                  } else if (imgElement.src.endsWith('.PNG')) {
-                    imgElement.src = imgElement.src.replace('.PNG', '.jpg');
-                  }
-                }}
-              />
-            </div>
+            <Image
+              src={slides[currentSlide].image}
+              alt={slides[currentSlide].alt}
+              fill
+              className="object-cover"
+              priority
+              quality={100}
+              onError={(e) => {
+                console.error(`Error loading image: ${slides[currentSlide].image}`);
+                const imgElement = e.target as HTMLImageElement;
+                console.log('Current src:', imgElement.src);
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
           </motion.div>
         </AnimatePresence>
 
-        {/* Slide Content */}
+        {/* Hero Content */}
         <div className="relative h-full flex items-center">
-          <div className="container">
+          <div className="container mx-auto px-4">
             <motion.div 
               className="max-w-3xl mx-auto text-center space-y-8"
               initial={{ opacity: 0, y: 20 }}
@@ -112,10 +109,10 @@ export default function Home() {
                 key={slides[currentSlide].title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white"
+                className="text-5xl md:text-7xl font-bold tracking-tight text-white"
               >
                 {slides[currentSlide].title}
-                <span className="block mt-2 text-brand-green">
+                <span className="block mt-4 text-3xl md:text-4xl text-brand-green">
                   {slides[currentSlide].description}
                 </span>
               </motion.h1>
@@ -144,14 +141,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Slide Indicators */}
-        <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2">
+        {/* Modern slide indicators */}
+        <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-3">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                currentSlide === index ? "bg-brand-green w-8" : "bg-white/50"
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                currentSlide === index ? "w-8 bg-brand-green" : "w-4 bg-white/50 hover:bg-white/80"
               }`}
             />
           ))}

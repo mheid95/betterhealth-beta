@@ -5,7 +5,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { ShoppingCart, Plus, Minus, Trash2 } from "lucide-react"
 import { useCart } from "@/context/cart-context"
 import { useState, useEffect } from "react"
-import { getBowlMacros, getDessertMacros, getDrinkMacros, getFermentMacros } from "@/config/nutritional-info"
+import { 
+  getBowlMacros, 
+  getDessertMacros, 
+  getDrinkMacros, 
+  getFermentedFoodMacros as getFermentMacros 
+} from "@/config/nutritional-info"
 import { MENU, BowlType } from "@/config/menu-prices"
 import Link from "next/link"
 import { calculateDeposits, calculateItemsTotal } from "@/lib/cart-calculations"
@@ -21,14 +26,22 @@ export function Cart() {
       let itemMacros = null
 
       // Check which type of item it is and get its macros
-      if (itemId in MENU.bowls) {
-        itemMacros = getBowlMacros(itemId as BowlType, item.size)
-      } else if (itemId in MENU.desserts) {
-        itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
-      } else if (itemId in MENU.drinks) {
-        itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
-      } else if (itemId in MENU.ferments) {
-        itemMacros = getFermentMacros(itemId as keyof typeof MENU.ferments, item.size)
+      const itemType = 
+        itemId in MENU.bowls ? 'bowls' :
+        itemId in MENU.desserts ? 'desserts' :
+        itemId in MENU.drinks ? 'drinks' :
+        itemId in MENU.fermented_foods ? 'fermented_foods' : null;
+
+      if (itemType) {
+        if (itemType === 'bowls') {
+          itemMacros = getBowlMacros(itemId as BowlType, item.size)
+        } else if (itemType === 'desserts') {
+          itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
+        } else if (itemType === 'drinks') {
+          itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
+        } else if (itemType === 'fermented_foods') {
+          itemMacros = getFermentMacros(itemId as keyof typeof MENU.fermented_foods, item.size)
+        }
       }
 
       if (itemMacros) {
@@ -86,15 +99,23 @@ export function Cart() {
                     let itemMacros = null
 
                     // Check which type of item it is and get its macros
+                    const itemType = 
+                      itemId in MENU.bowls ? 'bowls' :
+                      itemId in MENU.desserts ? 'desserts' :
+                      itemId in MENU.drinks ? 'drinks' :
+                      itemId in MENU.fermented_foods ? 'fermented_foods' : null;
+
                     try {
-                      if (itemId in MENU.bowls) {
-                        itemMacros = getBowlMacros(itemId as BowlType, item.size)
-                      } else if (itemId in MENU.desserts) {
-                        itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
-                      } else if (itemId in MENU.drinks) {
-                        itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
-                      } else if (itemId in MENU.ferments) {
-                        itemMacros = getFermentMacros(itemId as keyof typeof MENU.ferments, item.size)
+                      if (itemType) {
+                        if (itemType === 'bowls') {
+                          itemMacros = getBowlMacros(itemId as BowlType, item.size)
+                        } else if (itemType === 'desserts') {
+                          itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
+                        } else if (itemType === 'drinks') {
+                          itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
+                        } else if (itemType === 'fermented_foods') {
+                          itemMacros = getFermentMacros(itemId as keyof typeof MENU.fermented_foods, item.size)
+                        }
                       }
                     } catch {
                       // Item doesn't have macros or there was an error
