@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useCart } from "@/context/cart-context"
 import { MENU, BowlType, getBowlPrice } from "@/config/menu-prices"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 
 interface BowlCustomizationDialogProps {
@@ -20,6 +20,47 @@ export function BowlCustomizationDialog({ bowl, onClose }: BowlCustomizationDial
   const [selectedBase, setSelectedBase] = useState<string>('protein_rice')
   const [selectedSides, setSelectedSides] = useState<string[]>([])
   const [selectedSalsas, setSelectedSalsas] = useState<string[]>([])
+  const [currentTotal, setCurrentTotal] = useState<number>(0)
+
+  useEffect(() => {
+    if (!bowl) return
+
+    // 1. Base bowl price (including size)
+    const baseBowlPrice = Number(getBowlPrice(bowl, selectedSize))
+    
+    // 2. Base substitution price (if not protein_rice)
+    let baseSubPrice = 0
+    if (selectedBase !== 'protein_rice') {
+      baseSubPrice = Number(
+        MENU.customizations.base_options[selectedBase as keyof typeof MENU.customizations.base_options]
+      )
+    }
+
+    // 3. Extra sides total
+    const sidesTotal = selectedSides.reduce((total, sideId) => {
+      const sidePrice = MENU.customizations.extra_sides[sideId as keyof typeof MENU.customizations.extra_sides]
+      return total + Number(sidePrice)
+    }, 0)
+
+    // 4. Salsas total
+    const salsasTotal = selectedSalsas.reduce((total, salsaId) => {
+      const salsaPrice = MENU.customizations.salsas[salsaId as keyof typeof MENU.customizations.salsas]
+      return total + Number(salsaPrice)
+    }, 0)
+
+    // Set total price
+    const total = baseBowlPrice + baseSubPrice + sidesTotal + salsasTotal
+    setCurrentTotal(total)
+
+    // Debug logs
+    console.log({
+      baseBowlPrice,
+      baseSubPrice,
+      sidesTotal,
+      salsasTotal,
+      total
+    })
+  }, [bowl, selectedSize, selectedBase, selectedSides, selectedSalsas])
 
   if (!bowl) return null
 
@@ -36,32 +77,58 @@ export function BowlCustomizationDialog({ bowl, onClose }: BowlCustomizationDial
 
   const baseOptions = {
     carbs: [
-      "Protein Rice",
-      "Quinoa (+3.500)",
-      "Sweet Potato (+5.000)"
+      { id: "protein_rice", name: "Protein Rice", price: "0.000" },
+      { id: "quinoa", name: "Quinoa", price: "3.500" },
+      { id: "sweet_potato", name: "Sweet Potato", price: "5.000" }
     ],
     lowCarb: [
-      "Fermented Cabbage (+3.500)",
-      "Cucumber Salad (+3.500)",
-      "Kimchi (+8.000)"
+      { id: "fermented_cabbage_base", name: "Fermented Cabbage", price: "3.500" },
+      { id: "cucumber_salad_base", name: "Cucumber Salad", price: "3.500" },
+      { id: "kimchi_base", name: "Kimchi", price: "8.000" }
     ]
   }
 
+  // Format price for display
+  const formatPrice = (price: number) => {
+    return `$${price.toFixed(3)}`
+  }
+
   const handleAddToCart = () => {
-    const customizations = [
+    // Format customizations for display
+    const displayCustomizations = [
+      // Size for non T-Bone bowls
       ...(!isTBoneBowl ? [`Size: ${selectedSize === 'normal' ? 'Regular' : 'Big'}`] : []),
-      ...(isTBoneBowl ? [`Cooking: ${selectedCooking}`] : []),
-      `Base: ${selectedBase}`,
-      ...selectedSides.map(side => `Side: ${side}`),
-      ...selectedSalsas.map(salsa => `Salsa: ${salsa}`)
+      
+      // Base substitution (only if not protein rice)
+      ...(selectedBase !== 'protein_rice' ? [
+        `Base: ${selectedBase.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} (+${
+          MENU.customizations.base_options[selectedBase as keyof typeof MENU.customizations.base_options]
+        })`
+      ] : []),
+      
+      // Selected sides with prices
+      ...selectedSides.map(sideId => {
+        const price = MENU.customizations.extra_sides[sideId as keyof typeof MENU.customizations.extra_sides]
+        const name = sideId.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+        return `Side: ${name} (+${price})`
+      }),
+      
+      // Selected salsas with prices
+      ...selectedSalsas.map(salsaId => {
+        const price = MENU.customizations.salsas[salsaId as keyof typeof MENU.customizations.salsas]
+        const name = salsaId.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+        return `Salsa: ${name} (+${price})`
+      })
     ]
 
     addItem({
-      name: bowlId.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      name: bowl!.split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' '),
       size: selectedSize,
-      price: getBowlPrice(bowlId, selectedSize).replace(',', '.'),
+      price: formatPrice(currentTotal).replace('$', ''),
       quantity: 1,
-      customizations
+      customizations: displayCustomizations
     })
     onClose()
   }
@@ -160,16 +227,21 @@ export function BowlCustomizationDialog({ bowl, onClose }: BowlCustomizationDial
                 <div className="space-y-2">
                   {baseOptions.carbs.map((base) => (
                     <button
-                      key={base}
-                      onClick={() => setSelectedBase(base.toLowerCase().replace(' ', '_').replace(/\s*\([^)]*\)/g, ''))}
+                      key={base.id}
+                      onClick={() => setSelectedBase(base.id)}
                       className={cn(
                         "w-full p-2 rounded-lg border-2 transition-all text-left",
-                        selectedBase === base.toLowerCase().replace(' ', '_').replace(/\s*\([^)]*\)/g, '')
+                        selectedBase === base.id
                           ? "border-brand-green bg-brand-light"
                           : "border-gray-200 hover:border-brand-green/50"
                       )}
                     >
-                      <span className="text-sm font-medium text-brand-green">{base}</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-brand-green">{base.name}</span>
+                        {base.price !== "0.000" && (
+                          <span className="text-sm text-brand-green">+${base.price}</span>
+                        )}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -181,16 +253,21 @@ export function BowlCustomizationDialog({ bowl, onClose }: BowlCustomizationDial
                 <div className="space-y-2">
                   {baseOptions.lowCarb.map((base) => (
                     <button
-                      key={base}
-                      onClick={() => setSelectedBase(base.toLowerCase().replace(' ', '_').replace(/\s*\([^)]*\)/g, ''))}
+                      key={base.id}
+                      onClick={() => setSelectedBase(base.id)}
                       className={cn(
                         "w-full p-2 rounded-lg border-2 transition-all text-left",
-                        selectedBase === base.toLowerCase().replace(' ', '_').replace(/\s*\([^)]*\)/g, '')
+                        selectedBase === base.id
                           ? "border-brand-green bg-brand-light"
                           : "border-gray-200 hover:border-brand-green/50"
                       )}
                     >
-                      <span className="text-sm font-medium text-brand-green">{base}</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-brand-green">{base.name}</span>
+                        {base.price !== "0.000" && (
+                          <span className="text-sm text-brand-green">+${base.price}</span>
+                        )}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -209,14 +286,14 @@ export function BowlCustomizationDialog({ bowl, onClose }: BowlCustomizationDial
                     key={id}
                     onClick={() => {
                       setSelectedSides(prev => 
-                        prev.includes(name) 
-                          ? prev.filter(s => s !== name)
-                          : [...prev, name]
+                        prev.includes(id)
+                          ? prev.filter(s => s !== id)
+                          : [...prev, id]
                       )
                     }}
                     className={cn(
                       "p-2 rounded-lg border-2 transition-all text-left",
-                      selectedSides.includes(name)
+                      selectedSides.includes(id)
                         ? "border-brand-green bg-brand-light"
                         : "border-gray-200 hover:border-brand-green/50"
                     )}
@@ -242,14 +319,14 @@ export function BowlCustomizationDialog({ bowl, onClose }: BowlCustomizationDial
                     key={id}
                     onClick={() => {
                       setSelectedSalsas(prev => 
-                        prev.includes(name) 
-                          ? prev.filter(s => s !== name)
-                          : [...prev, name]
+                        prev.includes(id)
+                          ? prev.filter(s => s !== id)
+                          : [...prev, id]
                       )
                     }}
                     className={cn(
                       "p-2 rounded-lg border-2 transition-all text-left",
-                      selectedSalsas.includes(name)
+                      selectedSalsas.includes(id)
                         ? "border-brand-green bg-brand-light"
                         : "border-gray-200 hover:border-brand-green/50"
                     )}
@@ -264,8 +341,12 @@ export function BowlCustomizationDialog({ bowl, onClose }: BowlCustomizationDial
             </div>
           </div>
 
-          {/* Add to Cart Button */}
-          <div className="sticky bottom-0 pt-4 bg-white">
+          {/* Show running total */}
+          <div className="sticky bottom-0 pt-4 bg-white space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-medium text-brand-green">Total:</span>
+              <span className="text-xl font-bold text-brand-green">{formatPrice(currentTotal)}</span>
+            </div>
             <Button 
               onClick={handleAddToCart}
               className="w-full bg-brand-green text-white hover:bg-brand-dark h-12 text-lg"

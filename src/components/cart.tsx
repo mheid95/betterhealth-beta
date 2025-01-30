@@ -9,7 +9,10 @@ import {
   getBowlMacros, 
   getDessertMacros, 
   getDrinkMacros, 
-  getFermentedFoodMacros as getFermentMacros 
+  getFermentedFoodMacros as getFermentMacros,
+  getExtraSideMacros,
+  getSalsaMacros,
+  combineMacros
 } from "@/config/nutritional-info"
 import { MENU, BowlType } from "@/config/menu-prices"
 import Link from "next/link"
@@ -34,7 +37,26 @@ export function Cart() {
 
       if (itemType) {
         if (itemType === 'bowls') {
-          itemMacros = getBowlMacros(itemId as BowlType, item.size)
+          let totalMacros = getBowlMacros(itemId as BowlType, item.size)
+          
+          // Add macros from customizations
+          if (item.customizations?.length) {
+            item.customizations.forEach(customization => {
+              const customId = customization.toLowerCase().replace(/ /g, '_')
+              try {
+                if (customId in MENU.customizations.extra_sides) {
+                  totalMacros = combineMacros(totalMacros, 
+                    getExtraSideMacros(customId as keyof typeof MENU.customizations.extra_sides))
+                } else if (customId in MENU.customizations.salsas) {
+                  totalMacros = combineMacros(totalMacros, 
+                    getSalsaMacros(customId as keyof typeof MENU.customizations.salsas))
+                }
+              } catch {
+                console.warn(`Could not add macros for customization: ${customization}`)
+              }
+            })
+          }
+          itemMacros = totalMacros
         } else if (itemType === 'desserts') {
           itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
         } else if (itemType === 'drinks') {
@@ -108,7 +130,26 @@ export function Cart() {
                     try {
                       if (itemType) {
                         if (itemType === 'bowls') {
-                          itemMacros = getBowlMacros(itemId as BowlType, item.size)
+                          let totalMacros = getBowlMacros(itemId as BowlType, item.size)
+                          
+                          // Add macros from customizations
+                          if (item.customizations?.length) {
+                            item.customizations.forEach(customization => {
+                              const customId = customization.toLowerCase().replace(/ /g, '_')
+                              try {
+                                if (customId in MENU.customizations.extra_sides) {
+                                  totalMacros = combineMacros(totalMacros, 
+                                    getExtraSideMacros(customId as keyof typeof MENU.customizations.extra_sides))
+                                } else if (customId in MENU.customizations.salsas) {
+                                  totalMacros = combineMacros(totalMacros, 
+                                    getSalsaMacros(customId as keyof typeof MENU.customizations.salsas))
+                                }
+                              } catch {
+                                console.warn(`Could not add macros for customization: ${customization}`)
+                              }
+                            })
+                          }
+                          itemMacros = totalMacros
                         } else if (itemType === 'desserts') {
                           itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
                         } else if (itemType === 'drinks') {
@@ -141,6 +182,16 @@ export function Cart() {
                           )}
                           <p className="text-sm font-medium text-brand-green mt-1">
                             ${item.price.includes('.') ? item.price : `${item.price}.000`}
+                            {item.customizations?.map(customization => {
+                              const extraPrice = 
+                                MENU.customizations.extra_sides[customization as keyof typeof MENU.customizations.extra_sides] ||
+                                MENU.customizations.salsas[customization as keyof typeof MENU.customizations.salsas]
+                              return extraPrice ? (
+                                <span key={customization} className="text-xs ml-1">
+                                  + ${extraPrice}
+                                </span>
+                              ) : null
+                            })}
                           </p>
                         </div>
                         <div className="flex flex-col items-end space-y-2">

@@ -3,7 +3,7 @@
 import { MENU } from "@/config/menu-prices"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useCart } from "@/context/cart-context"
 import Image from "next/image"
 
@@ -33,6 +33,18 @@ export default function FermentedFoodsPage() {
       volume: item.normal.volume
     })), []
   )
+
+  useEffect(() => {
+    console.log('Available items:', ferments);
+    ferments.forEach(item => {
+      const imagePath = `/images/food/${item.id}`;
+      console.log(`Item ${item.id}:`, {
+        webp: `${imagePath}.webp`,
+        jpg: `${imagePath}.jpg`,
+        png: `${imagePath}.png`
+      });
+    });
+  }, [ferments]);
 
   return (
     <div className="min-h-screen bg-brand-brown">
@@ -131,7 +143,7 @@ export default function FermentedFoodsPage() {
                       {/* Image Container */}
                       <div className="relative w-full sm:w-28 h-48 sm:h-28 flex-shrink-0">
                         <Image
-                          src={`/images/food/${item.id}.webp`}
+                          src={`/images/food/${item.id}.jpg`}
                           alt={item.name}
                           fill
                           className="object-cover"
@@ -139,11 +151,16 @@ export default function FermentedFoodsPage() {
                           quality={90}
                           onError={(e) => {
                             const imgElement = e.target as HTMLImageElement;
-                            if (imgElement.src.endsWith('.webp')) {
-                              imgElement.src = imgElement.src.replace('.webp', '.PNG');
-                            } else if (imgElement.src.endsWith('.PNG')) {
-                              imgElement.src = imgElement.src.replace('.PNG', '.jpg');
-                            }
+                            const basePath = `/images/food/${item.id}`;
+                            
+                            // Try each format in sequence
+                            const formats = ['.jpg', '.png', '.webp', '.jpeg'];
+                            const currentFormat = formats.find(format => imgElement.src.endsWith(format));
+                            const currentIndex = formats.indexOf(currentFormat || '');
+                            const nextFormat = formats[(currentIndex + 1) % formats.length];
+                            
+                            console.log(`Image load failed for ${imgElement.src}, trying ${basePath}${nextFormat}`);
+                            imgElement.src = basePath + nextFormat;
                           }}
                         />
                       </div>

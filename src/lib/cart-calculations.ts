@@ -21,7 +21,17 @@ export function calculateDeposits(items: CartItem[]): number {
 export function calculateItemsTotal(items: CartItem[]): number {
   return items.reduce((total, item) => {
     const price = parseFloat(item.price.replace('.', ''))
-    return total + (price * item.quantity)
+    
+    // Calculate extras total
+    const extrasTotal = item.customizations?.reduce((extrasSum, customization) => {
+      const extraPrice = 
+        MENU.customizations.extra_sides[customization as keyof typeof MENU.customizations.extra_sides] ||
+        MENU.customizations.salsas[customization as keyof typeof MENU.customizations.salsas] ||
+        "0"
+      return extrasSum + parseFloat(extraPrice.replace('.', ''))
+    }, 0) || 0
+
+    return total + ((price + extrasTotal) * item.quantity)
   }, 0)
 }
 

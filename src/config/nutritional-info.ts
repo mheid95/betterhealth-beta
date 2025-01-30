@@ -538,6 +538,96 @@ export const NUTRITION = {
         portion: "900ml"
       }
     }
+  },
+
+  extra_sides: {
+    cucumber_salad: {
+      calories: 15,
+      protein: 1,
+      carbs: 3,
+      fat: 0,
+      fiber: 1
+    },
+    fermented_cabbage: {
+      calories: 20,
+      protein: 1,
+      carbs: 4,
+      fat: 0,
+      fiber: 2
+    },
+    pico_de_gallo: {
+      calories: 25,
+      protein: 1,
+      carbs: 5,
+      fat: 0,
+      fiber: 1
+    },
+    fermented_carrots: {
+      calories: 35,
+      protein: 1,
+      carbs: 8,
+      fat: 0,
+      fiber: 2
+    },
+    guacamole: {
+      calories: 120,
+      protein: 2,
+      carbs: 6,
+      fat: 11,
+      fiber: 5
+    },
+    kimchi: {
+      calories: 45,
+      protein: 2,
+      carbs: 9,
+      fat: 0,
+      fiber: 4
+    }
+  },
+
+  salsas: {
+    tomato_bbq: {
+      calories: 30,
+      protein: 0,
+      carbs: 7,
+      fat: 0,
+      fiber: 0
+    },
+    honey_mustard: {
+      calories: 45,
+      protein: 0,
+      carbs: 6,
+      fat: 3,
+      fiber: 0
+    },
+    sweet_chilli: {
+      calories: 40,
+      protein: 0,
+      carbs: 10,
+      fat: 0,
+      fiber: 0
+    },
+    chimichurri: {
+      calories: 35,
+      protein: 0,
+      carbs: 2,
+      fat: 3,
+      fiber: 0
+    },
+    sriracha: {
+      calories: 15,
+      protein: 0,
+      carbs: 3,
+      fat: 0,
+      fiber: 0
+    },
+    sriracha_honey: {
+      calories: 25,
+      protein: 0,
+      carbs: 6,
+      fat: 0,
+      fiber: 0
+    }
   }
 } as const
 
@@ -581,4 +671,22 @@ export function getBowlPortion(bowlType: keyof typeof NUTRITION.bowls, size: 'no
   return bowl[size]!.portion
 }
 
-export { getFermentedFoodMacros as getFermentMacros } 
+export { getFermentedFoodMacros as getFermentMacros }
+
+export function getExtraSideMacros(sideId: keyof typeof NUTRITION.extra_sides): Macros {
+  return NUTRITION.extra_sides[sideId]
+}
+
+export function getSalsaMacros(salsaId: keyof typeof NUTRITION.salsas): Macros {
+  return NUTRITION.salsas[salsaId]
+}
+
+export function combineMacros(macros1: Macros, macros2: Macros): Macros {
+  return {
+    calories: macros1.calories + macros2.calories,
+    protein: macros1.protein + macros2.protein,
+    carbs: macros1.carbs + macros2.carbs,
+    fat: macros1.fat + macros2.fat,
+    fiber: macros1.fiber + macros2.fiber
+  }
+} 
