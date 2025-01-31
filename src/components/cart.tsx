@@ -13,7 +13,8 @@ import {
   getExtraSideMacros,
   getSalsaMacros,
   getBaseMacros,
-  combineMacros
+  combineMacros,
+  NUTRITION
 } from "@/config/nutritional-info"
 import { MENU, BowlType } from "@/config/menu-prices"
 import Link from "next/link"
@@ -26,15 +27,18 @@ export function Cart() {
   // Calculate total macros
   const totalMacros = state.items.reduce((acc, item) => {
     try {
-      const itemId = item.name.toLowerCase().replace(/ /g, '_')
+      const itemId = item.name
+        .toLowerCase()
+        .replace(/ protein/g, '_protein')
+        .replace(/ /g, '_')
       let itemMacros = null
 
       // Check which type of item it is and get its macros
       const itemType = 
         itemId in MENU.bowls ? 'bowls' :
-        itemId in MENU.desserts ? 'desserts' :
+        itemId in NUTRITION.desserts ? 'desserts' :
         itemId in MENU.drinks ? 'drinks' :
-        itemId in MENU.fermented_foods ? 'fermented_foods' : null;
+        itemId in NUTRITION.fermented_foods ? 'fermented_foods' : null;
 
       if (itemType) {
         if (itemType === 'bowls') {
@@ -50,11 +54,10 @@ export function Cart() {
               if (customText.startsWith('base:')) {
                 // Remove base rice macros first
                 const riceSubtraction = {
-                  calories: -150,  // Adjust these values to match your protein rice macros
+                  calories: -150,
                   protein: -4,
                   carbs: -30,
-                  fat: -1,
-                  fiber: -2
+                  fat: -1
                 }
                 totalMacros = combineMacros(totalMacros, riceSubtraction)
 
@@ -97,7 +100,12 @@ export function Cart() {
           }
           itemMacros = totalMacros
         } else if (itemType === 'desserts') {
-          itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
+          // Convert menu dessert IDs to nutrition dessert IDs
+          const nutritionId = itemId
+            .replace('carrot_muffin', 'carrot_protein_muffin')
+            .replace('chocolate_muffin', 'chocolate_protein_muffin');
+          
+          itemMacros = getDessertMacros(nutritionId as keyof typeof NUTRITION.desserts, item.size);
         } else if (itemType === 'drinks') {
           itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
         } else if (itemType === 'fermented_foods') {
@@ -110,15 +118,14 @@ export function Cart() {
           calories: acc.calories + (itemMacros.calories * item.quantity),
           protein: acc.protein + (itemMacros.protein * item.quantity),
           carbs: acc.carbs + (itemMacros.carbs * item.quantity),
-          fat: acc.fat + (itemMacros.fat * item.quantity),
-          fiber: acc.fiber + (itemMacros.fiber * item.quantity)
+          fat: acc.fat + (itemMacros.fat * item.quantity)
         }
       }
       return acc
     } catch {
       return acc
     }
-  }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 })
+  }, { calories: 0, protein: 0, carbs: 0, fat: 0 })
 
   // Effect to show sidebar when items are added
   useEffect(() => {
@@ -156,15 +163,18 @@ export function Cart() {
               <>
                 <div className="space-y-6">
                   {state.items.map((item) => {
-                    const itemId = item.name.toLowerCase().replace(/ /g, '_')
+                    const itemId = item.name
+                      .toLowerCase()
+                      .replace(/ protein/g, '_protein')
+                      .replace(/ /g, '_')
                     let itemMacros = null
 
                     // Check which type of item it is and get its macros
                     const itemType = 
                       itemId in MENU.bowls ? 'bowls' :
-                      itemId in MENU.desserts ? 'desserts' :
+                      itemId in NUTRITION.desserts ? 'desserts' :
                       itemId in MENU.drinks ? 'drinks' :
-                      itemId in MENU.fermented_foods ? 'fermented_foods' : null;
+                      itemId in NUTRITION.fermented_foods ? 'fermented_foods' : null;
 
                     try {
                       if (itemType) {
@@ -181,11 +191,10 @@ export function Cart() {
                               if (customText.startsWith('base:')) {
                                 // Remove base rice macros first
                                 const riceSubtraction = {
-                                  calories: -150,  // Adjust these values to match your protein rice macros
+                                  calories: -150,
                                   protein: -4,
                                   carbs: -30,
-                                  fat: -1,
-                                  fiber: -2
+                                  fat: -1
                                 }
                                 totalMacros = combineMacros(totalMacros, riceSubtraction)
 
@@ -228,7 +237,12 @@ export function Cart() {
                           }
                           itemMacros = totalMacros
                         } else if (itemType === 'desserts') {
-                          itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
+                          // Convert menu dessert IDs to nutrition dessert IDs
+                          const nutritionId = itemId
+                            .replace('carrot_muffin', 'carrot_protein_muffin')
+                            .replace('chocolate_muffin', 'chocolate_protein_muffin');
+                          
+                          itemMacros = getDessertMacros(nutritionId as keyof typeof NUTRITION.desserts, item.size);
                         } else if (itemType === 'drinks') {
                           itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
                         } else if (itemType === 'fermented_foods') {

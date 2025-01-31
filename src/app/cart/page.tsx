@@ -79,7 +79,7 @@ function CartContent() {
       if (itemId in MENU.bowls) {
         itemMacros = getBowlMacros(itemId as BowlType, item.size)
       } else if (itemId in MENU.desserts) {
-        itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
+        itemMacros = getDessertMacros(itemId, item.size)
       } else if (itemId in MENU.drinks) {
         itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
       } else if (itemId in MENU.fermented_foods) {
@@ -91,15 +91,14 @@ function CartContent() {
           calories: acc.calories + (itemMacros.calories * item.quantity),
           protein: acc.protein + (itemMacros.protein * item.quantity),
           carbs: acc.carbs + (itemMacros.carbs * item.quantity),
-          fat: acc.fat + (itemMacros.fat * item.quantity),
-          fiber: acc.fiber + (itemMacros.fiber * item.quantity)
+          fat: acc.fat + (itemMacros.fat * item.quantity)
         }
       }
       return acc
     } catch {
       return acc
     }
-  }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 })
+  }, { calories: 0, protein: 0, carbs: 0, fat: 0 })
 
   const handleCheckout = () => {
     // Include address, delivery time, and payment method in WhatsApp message
@@ -157,7 +156,7 @@ ${address.comments ? `\nSpecial Instructions:\n${address.comments}` : ''}`
                 if (itemId in MENU.bowls) {
                   itemMacros = getBowlMacros(itemId as BowlType, item.size)
                 } else if (itemId in MENU.desserts) {
-                  itemMacros = getDessertMacros(itemId as keyof typeof MENU.desserts, item.size)
+                  itemMacros = getDessertMacros(itemId, item.size)
                 } else if (itemId in MENU.drinks) {
                   itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
                 } else if (itemId in MENU.fermented_foods) {
