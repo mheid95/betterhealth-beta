@@ -12,6 +12,7 @@ import {
   getFermentedFoodMacros as getFermentMacros,
   getExtraSideMacros,
   getSalsaMacros,
+  getBaseMacros,
   combineMacros
 } from "@/config/nutritional-info"
 import { MENU, BowlType } from "@/config/menu-prices"
@@ -42,17 +43,55 @@ export function Cart() {
           // Add macros from customizations
           if (item.customizations?.length) {
             item.customizations.forEach(customization => {
-              const customId = customization.toLowerCase().replace(/ /g, '_')
-              try {
-                if (customId in MENU.customizations.extra_sides) {
-                  totalMacros = combineMacros(totalMacros, 
-                    getExtraSideMacros(customId as keyof typeof MENU.customizations.extra_sides))
-                } else if (customId in MENU.customizations.salsas) {
-                  totalMacros = combineMacros(totalMacros, 
-                    getSalsaMacros(customId as keyof typeof MENU.customizations.salsas))
+              // Extract the ID part from customization string (e.g., "Base: Kimchi (+8.000)" -> "kimchi_base")
+              const customText = customization.toLowerCase()
+              
+              // Handle base substitutions
+              if (customText.startsWith('base:')) {
+                // Remove base rice macros first
+                const riceSubtraction = {
+                  calories: -150,  // Adjust these values to match your protein rice macros
+                  protein: -4,
+                  carbs: -30,
+                  fat: -1,
+                  fiber: -2
                 }
-              } catch {
-                console.warn(`Could not add macros for customization: ${customization}`)
+                totalMacros = combineMacros(totalMacros, riceSubtraction)
+
+                // Add new base macros
+                const baseId = customText.includes('kimchi') ? 'kimchi_base' :
+                              customText.includes('cabbage') ? 'fermented_cabbage_base' :
+                              customText.includes('cucumber') ? 'cucumber_salad_base' :
+                              customText.includes('quinoa') ? 'quinoa' :
+                              customText.includes('sweet potato') ? 'sweet_potato' : null
+
+                if (baseId) {
+                  try {
+                    const baseMacros = getBaseMacros(baseId as keyof typeof MENU.customizations.base_options)
+                    totalMacros = combineMacros(totalMacros, baseMacros)
+                  } catch {
+                    console.warn(`Could not add macros for base substitution: ${baseId}`)
+                  }
+                }
+              }
+              // Handle sides and salsas
+              else if (customText.startsWith('side:')) {
+                const sideId = customText.split(':')[1].trim().replace(/ \(\+.*\)/, '').replace(/ /g, '_')
+                try {
+                  totalMacros = combineMacros(totalMacros, 
+                    getExtraSideMacros(sideId as keyof typeof MENU.customizations.extra_sides))
+                } catch {
+                  console.warn(`Could not add macros for side: ${sideId}`)
+                }
+              }
+              else if (customText.startsWith('salsa:')) {
+                const salsaId = customText.split(':')[1].trim().replace(/ \(\+.*\)/, '').replace(/ /g, '_')
+                try {
+                  totalMacros = combineMacros(totalMacros, 
+                    getSalsaMacros(salsaId as keyof typeof MENU.customizations.salsas))
+                } catch {
+                  console.warn(`Could not add macros for salsa: ${salsaId}`)
+                }
               }
             })
           }
@@ -135,17 +174,55 @@ export function Cart() {
                           // Add macros from customizations
                           if (item.customizations?.length) {
                             item.customizations.forEach(customization => {
-                              const customId = customization.toLowerCase().replace(/ /g, '_')
-                              try {
-                                if (customId in MENU.customizations.extra_sides) {
-                                  totalMacros = combineMacros(totalMacros, 
-                                    getExtraSideMacros(customId as keyof typeof MENU.customizations.extra_sides))
-                                } else if (customId in MENU.customizations.salsas) {
-                                  totalMacros = combineMacros(totalMacros, 
-                                    getSalsaMacros(customId as keyof typeof MENU.customizations.salsas))
+                              // Extract the ID part from customization string (e.g., "Base: Kimchi (+8.000)" -> "kimchi_base")
+                              const customText = customization.toLowerCase()
+                              
+                              // Handle base substitutions
+                              if (customText.startsWith('base:')) {
+                                // Remove base rice macros first
+                                const riceSubtraction = {
+                                  calories: -150,  // Adjust these values to match your protein rice macros
+                                  protein: -4,
+                                  carbs: -30,
+                                  fat: -1,
+                                  fiber: -2
                                 }
-                              } catch {
-                                console.warn(`Could not add macros for customization: ${customization}`)
+                                totalMacros = combineMacros(totalMacros, riceSubtraction)
+
+                                // Add new base macros
+                                const baseId = customText.includes('kimchi') ? 'kimchi_base' :
+                                              customText.includes('cabbage') ? 'fermented_cabbage_base' :
+                                              customText.includes('cucumber') ? 'cucumber_salad_base' :
+                                              customText.includes('quinoa') ? 'quinoa' :
+                                              customText.includes('sweet potato') ? 'sweet_potato' : null
+
+                                if (baseId) {
+                                  try {
+                                    const baseMacros = getBaseMacros(baseId as keyof typeof MENU.customizations.base_options)
+                                    totalMacros = combineMacros(totalMacros, baseMacros)
+                                  } catch {
+                                    console.warn(`Could not add macros for base substitution: ${baseId}`)
+                                  }
+                                }
+                              }
+                              // Handle sides and salsas
+                              else if (customText.startsWith('side:')) {
+                                const sideId = customText.split(':')[1].trim().replace(/ \(\+.*\)/, '').replace(/ /g, '_')
+                                try {
+                                  totalMacros = combineMacros(totalMacros, 
+                                    getExtraSideMacros(sideId as keyof typeof MENU.customizations.extra_sides))
+                                } catch {
+                                  console.warn(`Could not add macros for side: ${sideId}`)
+                                }
+                              }
+                              else if (customText.startsWith('salsa:')) {
+                                const salsaId = customText.split(':')[1].trim().replace(/ \(\+.*\)/, '').replace(/ /g, '_')
+                                try {
+                                  totalMacros = combineMacros(totalMacros, 
+                                    getSalsaMacros(salsaId as keyof typeof MENU.customizations.salsas))
+                                } catch {
+                                  console.warn(`Could not add macros for salsa: ${salsaId}`)
+                                }
                               }
                             })
                           }

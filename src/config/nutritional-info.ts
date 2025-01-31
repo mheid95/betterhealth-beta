@@ -1,3 +1,5 @@
+import { MENU } from './menu-prices'
+
 export interface Macros {
   calories: number;
   protein: number;
@@ -688,5 +690,60 @@ export function combineMacros(macros1: Macros, macros2: Macros): Macros {
     carbs: macros1.carbs + macros2.carbs,
     fat: macros1.fat + macros2.fat,
     fiber: macros1.fiber + macros2.fiber
+  }
+}
+
+export function getBaseMacros(baseId: keyof typeof MENU.customizations.base_options): Macros {
+  switch (baseId) {
+    case 'protein_rice':
+      return {
+        calories: 150,
+        protein: 4,
+        carbs: 30,
+        fat: 1,
+        fiber: 2
+      }
+    case 'quinoa':
+      return {
+        calories: 120,
+        protein: 4,
+        carbs: 21,
+        fat: 2,
+        fiber: 3
+      }
+    case 'sweet_potato':
+      return {
+        calories: 90,
+        protein: 2,
+        carbs: 20,
+        fat: 0,
+        fiber: 3
+      }
+    case 'fermented_cabbage_base':
+      return {
+        calories: 20,
+        protein: 1,
+        carbs: 4,
+        fat: 0,
+        fiber: 2
+      }
+    case 'cucumber_salad_base':
+      return {
+        calories: 15,
+        protein: 1,
+        carbs: 3,
+        fat: 0,
+        fiber: 1
+      }
+    case 'kimchi_base':
+      return {
+        calories: 45,
+        protein: 2,
+        carbs: 9,
+        fat: 0,
+        fiber: 4
+      }
+    default:
+      throw new Error(`Unknown base option: ${baseId}`)
   }
 } 

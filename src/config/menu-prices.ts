@@ -188,6 +188,7 @@ export const MENU = {
   // FERMENTED PRODUCTS
   fermented_foods: {
     sourdough_protein_bread: {
+      image: "/images/fermented-foods/sourdough_protein_bread.jpg",
       name: "Sourdough Protein Bread",
       ingredients: "Organic flour, protein, sourdough culture",
       normal: {
@@ -197,6 +198,7 @@ export const MENU = {
       big: null
     },
     white_cabbage: {
+      image: "/images/fermented-foods/white_cabbage.jpg",
       name: "White Cabbage Sauerkraut",
       ingredients: "White cabbage, himalayan salt",
       normal: {
@@ -209,6 +211,7 @@ export const MENU = {
       }
     },
     red_cabbage: {
+      image: "/images/fermented-foods/red_cabbage.jpg",
       name: "Red Cabbage Sauerkraut",
       ingredients: "Red cabbage, himalayan salt",
       normal: {
@@ -221,6 +224,7 @@ export const MENU = {
       }
     },
     carrots: {
+      image: "/images/fermented-foods/carrots.jpg",
       name: "Fermented Carrots",
       ingredients: "Carrots, himalayan salt, spices",
       normal: {
@@ -233,7 +237,8 @@ export const MENU = {
       }
     },
     kimchi: {
-      name: "BetterHealth Kimchi",
+      image: "/images/fermented-foods/kimchi.jpg",
+      name: "Kimchi",
       ingredients: "Napa cabbage, korean chili, garlic, ginger",
       normal: {
         price: "17.000",
@@ -245,8 +250,9 @@ export const MENU = {
       }
     },
     sriracha: {
-      name: "Sriracha Sauce",
-      ingredients: "Fermented chili peppers, garlic, vinegar",
+      image: "/images/fermented-foods/sriracha.jpg",
+      name: "Fermented Sriracha",
+      ingredients: "Red chili, garlic, vinegar",
       normal: {
         price: "35.000",
         volume: "400ml"
@@ -384,4 +390,4 @@ export function formatPrice(price: string): string {
   return `$${price}`
 }
 
-export type MenuCategory = 'bowls' | 'desserts' | 'drinks' | 'fermented_foods' 
+export type MenuCategory = 'bowls' | 'desserts' | 'drinks' | 'fermented_foods'
