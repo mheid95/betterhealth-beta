@@ -393,22 +393,22 @@ export const NUTRITION = {
         portion: "600g"
       }
     },
-    fermented_carrots: {
+    fermented_white_cabbage: {
       normal: {
         macros: {
-          calories: 20 * 4,      // 80 cal (400ml)
-          protein: 0.5 * 4,      // 2g protein
-          carbs: 4 * 4,          // 16g carbs
-          fat: 0 * 4             // 0g fat
+          calories: 12 * 4,      // 48 cal (400ml)
+          protein: 0.8 * 4,      // 3.2g protein
+          carbs: 2.5 * 4,        // 10g carbs
+          fat: 0
         },
         portion: "400ml"
       },
       big: {
         macros: {
-          calories: 20 * 9,      // 180 cal (900ml)
-          protein: 0.5 * 9,      // 4.5g protein
-          carbs: 4 * 9,          // 36g carbs
-          fat: 0 * 9             // 0g fat
+          calories: 12 * 9,      // 108 cal (900ml)
+          protein: 0.8 * 9,      // 7.2g protein
+          carbs: 2.5 * 9,        // 22.5g carbs
+          fat: 0
         },
         portion: "900ml"
       }
@@ -433,46 +433,6 @@ export const NUTRITION = {
         portion: "900ml"
       }
     },
-    fermented_red_cabbage: {
-      normal: {
-        macros: {
-          calories: 15 * 4,      // 60 cal (400ml)
-          protein: 1 * 4,        // 4g protein
-          carbs: 3 * 4,          // 12g carbs
-          fat: 0 * 4             // 0g fat
-        },
-        portion: "400ml"
-      },
-      big: {
-        macros: {
-          calories: 15 * 9,      // 135 cal (900ml)
-          protein: 1 * 9,        // 9g protein
-          carbs: 3 * 9,          // 27g carbs
-          fat: 0 * 9             // 0g fat
-        },
-        portion: "900ml"
-      }
-    },
-    fermented_white_cabbage: {
-      normal: {
-        macros: {
-          calories: 12 * 4,      // 48 cal (400ml)
-          protein: 0.8 * 4,      // 3.2g protein
-          carbs: 2.5 * 4,        // 10g carbs
-          fat: 0 * 4             // 0g fat
-        },
-        portion: "400ml"
-      },
-      big: {
-        macros: {
-          calories: 12 * 9,      // 108 cal (900ml)
-          protein: 0.8 * 9,      // 7.2g protein
-          carbs: 2.5 * 9,        // 22.5g carbs
-          fat: 0 * 9             // 0g fat
-        },
-        portion: "900ml"
-      }
-    },
     homemade_kimchi: {
       normal: {
         macros: {
@@ -489,66 +449,6 @@ export const NUTRITION = {
           protein: 1.5 * 9,      // 13.5g protein
           carbs: 3.5 * 9,        // 31.5g carbs
           fat: 0 * 9             // 0g fat
-        },
-        portion: "900ml"
-      }
-    },
-    white_cabbage: {
-      normal: {
-        macros: {
-          calories: 25,
-          protein: 1,
-          carbs: 5,
-          fat: 0
-        },
-        portion: "400ml"
-      },
-      big: {
-        macros: {
-          calories: 56,
-          protein: 2,
-          carbs: 11,
-          fat: 0
-        },
-        portion: "900ml"
-      }
-    },
-    red_cabbage: {
-      normal: {
-        macros: {
-          calories: 25,
-          protein: 1,
-          carbs: 5,
-          fat: 0
-        },
-        portion: "400ml"
-      },
-      big: {
-        macros: {
-          calories: 56,
-          protein: 2,
-          carbs: 11,
-          fat: 0
-        },
-        portion: "900ml"
-      }
-    },
-    carrots: {
-      normal: {
-        macros: {
-          calories: 35,
-          protein: 1,
-          carbs: 8,
-          fat: 0
-        },
-        portion: "400ml"
-      },
-      big: {
-        macros: {
-          calories: 79,
-          protein: 2,
-          carbs: 18,
-          fat: 0
         },
         portion: "900ml"
       }
@@ -612,12 +512,6 @@ export const NUTRITION = {
       calories: 25,
       protein: 1,
       carbs: 5,
-      fat: 0
-    },
-    fermented_carrots: {
-      calories: 35,
-      protein: 1,
-      carbs: 8,
       fat: 0
     },
     guacamole: {

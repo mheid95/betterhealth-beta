@@ -5,7 +5,8 @@ import {
   getBowlMacros, 
   getDessertMacros, 
   getDrinkMacros, 
-  getFermentedFoodMacros as getFermentMacros 
+  getFermentedFoodMacros as getFermentMacros,
+  NUTRITION
 } from "@/config/nutritional-info"
 import { MENU, BowlType } from "@/config/menu-prices"
 import { Button } from "@/components/ui/button"
@@ -54,6 +55,26 @@ const paymentMethods = [
   }
 ]
 
+// Update the mapping function
+const getFermentedFoodId = (menuId: string): keyof typeof NUTRITION.fermented_foods => {
+  switch (menuId) {
+    case 'white_cabbage':
+      return 'fermented_white_cabbage'
+    case 'red_cabbage':
+      return 'fermented_white_cabbage'
+    case 'carrots':
+      return 'fermented_white_cabbage'
+    case 'kimchi':
+      return 'homemade_kimchi'
+    case 'sriracha':
+      return 'fermented_sriracha'
+    case 'sourdough_protein_bread':
+      return 'sourdough_protein_bread'
+    default:
+      return 'fermented_white_cabbage'
+  }
+}
+
 function CartContent() {
   const { state, removeItem, updateQuantity, sendToWhatsApp } = useCart()
   const [address, setAddress] = useState<AddressForm>({
@@ -83,7 +104,8 @@ function CartContent() {
       } else if (itemId in MENU.drinks) {
         itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
       } else if (itemId in MENU.fermented_foods) {
-        itemMacros = getFermentMacros(itemId as keyof typeof MENU.fermented_foods, item.size)
+        const nutritionId = getFermentedFoodId(itemId)
+        itemMacros = getFermentMacros(nutritionId, item.size)
       }
 
       if (itemMacros) {
@@ -160,7 +182,8 @@ ${address.comments ? `\nSpecial Instructions:\n${address.comments}` : ''}`
                 } else if (itemId in MENU.drinks) {
                   itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
                 } else if (itemId in MENU.fermented_foods) {
-                  itemMacros = getFermentMacros(itemId as keyof typeof MENU.fermented_foods, item.size)
+                  const nutritionId = getFermentedFoodId(itemId)
+                  itemMacros = getFermentMacros(nutritionId, item.size)
                 }
               } catch {
                 // Item doesn't have macros or there was an error

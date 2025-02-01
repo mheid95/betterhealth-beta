@@ -10,8 +10,6 @@ import {
   getDessertMacros, 
   getDrinkMacros, 
   getFermentedFoodMacros as getFermentMacros,
-  getExtraSideMacros,
-  getSalsaMacros,
   getBaseMacros,
   combineMacros,
   NUTRITION
@@ -19,6 +17,46 @@ import {
 import { MENU, BowlType } from "@/config/menu-prices"
 import Link from "next/link"
 import { calculateDeposits, calculateItemsTotal } from "@/lib/cart-calculations"
+
+interface Macros {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+function handleCustomization(customText: string, macros: Macros): Macros {
+  if (customText.startsWith('base:')) {
+    return handleBaseCustomization(customText, macros)
+  }
+  return macros
+}
+
+function handleBaseCustomization(customText: string, macros: Macros): Macros {
+  const riceSubtraction = {
+    calories: -150,
+    protein: -4,
+    carbs: -30,
+    fat: -1
+  }
+  const withoutRice = combineMacros(macros, riceSubtraction)
+
+  const baseId = customText.includes('kimchi') ? 'kimchi_base' :
+                customText.includes('cabbage') ? 'fermented_cabbage_base' :
+                customText.includes('cucumber') ? 'cucumber_salad_base' :
+                customText.includes('quinoa') ? 'quinoa' :
+                customText.includes('sweet potato') ? 'sweet_potato' : null
+
+  if (baseId) {
+    try {
+      const baseMacros = getBaseMacros(baseId as keyof typeof MENU.customizations.base_options)
+      return combineMacros(withoutRice, baseMacros)
+    } catch {
+      console.warn(`Could not add macros for base substitution: ${baseId}`)
+    }
+  }
+  return withoutRice
+}
 
 export function Cart() {
   const { state, removeItem, updateQuantity } = useCart()
@@ -42,74 +80,23 @@ export function Cart() {
 
       if (itemType) {
         if (itemType === 'bowls') {
-          let totalMacros = getBowlMacros(itemId as BowlType, item.size)
+          const bowlMacros = getBowlMacros(itemId as BowlType, item.size)
           
           // Add macros from customizations
-          if (item.customizations?.length) {
-            item.customizations.forEach(customization => {
-              // Extract the ID part from customization string (e.g., "Base: Kimchi (+8.000)" -> "kimchi_base")
-              const customText = customization.toLowerCase()
-              
-              // Handle base substitutions
-              if (customText.startsWith('base:')) {
-                // Remove base rice macros first
-                const riceSubtraction = {
-                  calories: -150,
-                  protein: -4,
-                  carbs: -30,
-                  fat: -1
-                }
-                totalMacros = combineMacros(totalMacros, riceSubtraction)
-
-                // Add new base macros
-                const baseId = customText.includes('kimchi') ? 'kimchi_base' :
-                              customText.includes('cabbage') ? 'fermented_cabbage_base' :
-                              customText.includes('cucumber') ? 'cucumber_salad_base' :
-                              customText.includes('quinoa') ? 'quinoa' :
-                              customText.includes('sweet potato') ? 'sweet_potato' : null
-
-                if (baseId) {
-                  try {
-                    const baseMacros = getBaseMacros(baseId as keyof typeof MENU.customizations.base_options)
-                    totalMacros = combineMacros(totalMacros, baseMacros)
-                  } catch {
-                    console.warn(`Could not add macros for base substitution: ${baseId}`)
-                  }
-                }
-              }
-              // Handle sides and salsas
-              else if (customText.startsWith('side:')) {
-                const sideId = customText.split(':')[1].trim().replace(/ \(\+.*\)/, '').replace(/ /g, '_')
-                try {
-                  totalMacros = combineMacros(totalMacros, 
-                    getExtraSideMacros(sideId as keyof typeof MENU.customizations.extra_sides))
-                } catch {
-                  console.warn(`Could not add macros for side: ${sideId}`)
-                }
-              }
-              else if (customText.startsWith('salsa:')) {
-                const salsaId = customText.split(':')[1].trim().replace(/ \(\+.*\)/, '').replace(/ /g, '_')
-                try {
-                  totalMacros = combineMacros(totalMacros, 
-                    getSalsaMacros(salsaId as keyof typeof MENU.customizations.salsas))
-                } catch {
-                  console.warn(`Could not add macros for salsa: ${salsaId}`)
-                }
-              }
-            })
-          }
-          itemMacros = totalMacros
+          itemMacros = item.customizations?.reduce((total: Macros, customization) => {
+            const customText = customization.toLowerCase()
+            return handleCustomization(customText, total)
+          }, bowlMacros) || bowlMacros
         } else if (itemType === 'desserts') {
-          // Convert menu dessert IDs to nutrition dessert IDs
           const nutritionId = itemId
             .replace('carrot_muffin', 'carrot_protein_muffin')
-            .replace('chocolate_muffin', 'chocolate_protein_muffin');
+            .replace('chocolate_muffin', 'chocolate_protein_muffin')
           
-          itemMacros = getDessertMacros(nutritionId as keyof typeof NUTRITION.desserts, item.size);
+          itemMacros = getDessertMacros(nutritionId as keyof typeof NUTRITION.desserts, item.size)
         } else if (itemType === 'drinks') {
           itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
         } else if (itemType === 'fermented_foods') {
-          itemMacros = getFermentMacros(itemId as keyof typeof MENU.fermented_foods, item.size)
+          itemMacros = getFermentMacros(itemId as keyof typeof NUTRITION.fermented_foods, item.size)
         }
       }
 
@@ -179,65 +166,14 @@ export function Cart() {
                     try {
                       if (itemType) {
                         if (itemType === 'bowls') {
-                          let totalMacros = getBowlMacros(itemId as BowlType, item.size)
+                          const bowlMacros = getBowlMacros(itemId as BowlType, item.size)
                           
                           // Add macros from customizations
-                          if (item.customizations?.length) {
-                            item.customizations.forEach(customization => {
-                              // Extract the ID part from customization string (e.g., "Base: Kimchi (+8.000)" -> "kimchi_base")
-                              const customText = customization.toLowerCase()
-                              
-                              // Handle base substitutions
-                              if (customText.startsWith('base:')) {
-                                // Remove base rice macros first
-                                const riceSubtraction = {
-                                  calories: -150,
-                                  protein: -4,
-                                  carbs: -30,
-                                  fat: -1
-                                }
-                                totalMacros = combineMacros(totalMacros, riceSubtraction)
-
-                                // Add new base macros
-                                const baseId = customText.includes('kimchi') ? 'kimchi_base' :
-                                              customText.includes('cabbage') ? 'fermented_cabbage_base' :
-                                              customText.includes('cucumber') ? 'cucumber_salad_base' :
-                                              customText.includes('quinoa') ? 'quinoa' :
-                                              customText.includes('sweet potato') ? 'sweet_potato' : null
-
-                                if (baseId) {
-                                  try {
-                                    const baseMacros = getBaseMacros(baseId as keyof typeof MENU.customizations.base_options)
-                                    totalMacros = combineMacros(totalMacros, baseMacros)
-                                  } catch {
-                                    console.warn(`Could not add macros for base substitution: ${baseId}`)
-                                  }
-                                }
-                              }
-                              // Handle sides and salsas
-                              else if (customText.startsWith('side:')) {
-                                const sideId = customText.split(':')[1].trim().replace(/ \(\+.*\)/, '').replace(/ /g, '_')
-                                try {
-                                  totalMacros = combineMacros(totalMacros, 
-                                    getExtraSideMacros(sideId as keyof typeof MENU.customizations.extra_sides))
-                                } catch {
-                                  console.warn(`Could not add macros for side: ${sideId}`)
-                                }
-                              }
-                              else if (customText.startsWith('salsa:')) {
-                                const salsaId = customText.split(':')[1].trim().replace(/ \(\+.*\)/, '').replace(/ /g, '_')
-                                try {
-                                  totalMacros = combineMacros(totalMacros, 
-                                    getSalsaMacros(salsaId as keyof typeof MENU.customizations.salsas))
-                                } catch {
-                                  console.warn(`Could not add macros for salsa: ${salsaId}`)
-                                }
-                              }
-                            })
-                          }
-                          itemMacros = totalMacros
+                          itemMacros = item.customizations?.reduce((total: Macros, customization) => {
+                            const customText = customization.toLowerCase()
+                            return handleCustomization(customText, total)
+                          }, bowlMacros) || bowlMacros
                         } else if (itemType === 'desserts') {
-                          // Convert menu dessert IDs to nutrition dessert IDs
                           const nutritionId = itemId
                             .replace('carrot_muffin', 'carrot_protein_muffin')
                             .replace('chocolate_muffin', 'chocolate_protein_muffin');
@@ -246,7 +182,7 @@ export function Cart() {
                         } else if (itemType === 'drinks') {
                           itemMacros = getDrinkMacros(itemId as keyof typeof MENU.drinks, item.size)
                         } else if (itemType === 'fermented_foods') {
-                          itemMacros = getFermentMacros(itemId as keyof typeof MENU.fermented_foods, item.size)
+                          itemMacros = getFermentMacros(itemId as keyof typeof NUTRITION.fermented_foods, item.size)
                         }
                       }
                     } catch {

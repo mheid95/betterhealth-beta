@@ -1,0 +1,29 @@
+model Order {
+  id              String      @id @default(cuid())
+  customerName    String
+  items           Json        // Stores OrderItem[]
+  total           Float
+  timestamp       DateTime    @default(now())
+  status          String      // pending/completed/cancelled
+  paymentMethod   String
+  deliveryAddress Json?      // Optional delivery address
+}
+
+model Expense {
+  id          String    @id @default(cuid())
+  description String
+  amount      Float
+  category    String
+  date        DateTime  @default(now())
+  receipt     String?   // Optional receipt URL
+}
+
+model DailyReport {
+  id            String    @id @default(cuid())
+  date          DateTime  @unique
+  orders        Json      // Stores Order[]
+  totalRevenue  Float
+  expenses      Json      // Stores Expense[]
+  totalExpenses Float
+  netProfit     Float
+} 
